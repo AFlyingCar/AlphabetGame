@@ -5,35 +5,41 @@
 #####################
 
 import pygame, sys
+import threading
+import Queue
 from pygame.locals import *
 from string import *
-from multiprocessing.pool import ThreadPool
+import thread
 
 pygame.init()
+class myThread(threading.Thread):
+    def __init__(self, threadID, name, q, e):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+        self.q = q
+        self.e = e
+    
+    def run(self):
+        while e:
+        	pygame.time.delay(10000)
+        	e = False
 
-def wait(time):
-	pygame.time.wait(time)
-	up = False
-	return up
-
-def timer():
-	thread.start_new_thread(wait, 30000)
+def wait(e):
+	while e:
+		pygame.time.delay(10000)
+		e = False
 
 print letters
-
 game = True
-numP = int(raw_input("How many people are playing: "))
-clock = pygame.time.Clock()
-pool = ThreadPool(processes = 1)
-up = True
+numP = 2
+exitFlag = True
 
 while True:
 	while game:
 		for i in range(numP):
-			raw_input("What is your animal: ")
-			async_result = pool.apply_async(timer, ())
-
-			while return_val
+			animal = raw_input("What is your animal: ")
+			thread.start_new_thread(wait, (exitFlag,))
 
 pygame.quit()
 
