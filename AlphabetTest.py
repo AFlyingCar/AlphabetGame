@@ -63,7 +63,7 @@ while game:
 				print "Player %s's turn!" % i.getName()
 				guess = raw_input("Choose an animal that starts with the letter '" + item.upper() + "': ")
 
-				if guess.lower() in animals and guess.lower()[0] == item:
+				if guess.lower() in animals and guess.lower()[0] == item and guess.lower() not in guesses:
 					print "That's an animal!"
 					guesses.append(guess)
 
