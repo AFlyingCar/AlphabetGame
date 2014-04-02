@@ -1,8 +1,12 @@
 import pygame, sys
 from pygame.locals import *
 from string import *
+from DatabaseReader import *
+#from Main import *
+from color import *
+import Menu
 
-class player():
+class Player():
 	def __init__(self, name=0):
 		self.letters = []
 		self.name = str(name)
@@ -16,38 +20,14 @@ class player():
 	def getName(self):
 		return self.name
 
-def shutdown():
-	pygame.quit()
-	sys.exit()
-
-def keycheck(event):
-    if event.type == QUIT:
-        shutdown()
-
-    if event.type == KEYDOWN:
-        print event.unicode
-
-        if event.key == K_ESCAPE:
-            shutdown()
-
-def init(numP):
-	players = []
-	for i in range(numP):
-		name = raw_input("What is Player %d's name: " % i)
-		x = player(name)
-		x.attr = i
-		players.append(x)
-
-	return players
-
-def CLI(promptpos, prompt, pos, uinput=""):
+def CLI(promptpos, prompt, pos, uinput="",color=GREEN,game=False):
 	while True:
 		for event in pygame.event.get():
-			keycheck(event)
+			keycheck(event,game)
 
 			if event.type == KEYDOWN:
 				if event.key == K_RETURN:
-					display.fill(GREEN)
+					display.fill(color)
 					print ">> " + uinput
 					return uinput
 
@@ -59,51 +39,41 @@ def CLI(promptpos, prompt, pos, uinput=""):
 					except Exception:
 						continue
 
+				if event.key == K_ESCAPE:
+					continue
+
 				else:
 					uinput += event.unicode
 					print ">> "+ uinput
 
-		#print uinput
 		i = fontObj.render(uinput,True,BLACK)
 
-		display.fill(GREEN)
+		display.fill(color)
 		display.blit(i,pos)
-		display.blit(prompt[0],promptpos[0])
-		display.blit(prompt[1],promptpos[1])
-		display.blit(prompt[2],promptpos[2])
+
+		prompts = {}
+
+		x = 0
+		for p in prompt:
+			prompts[p] = x
+			x += 1
+
+		for p in promptpos:
+			num = promptpos.index(p)
+			for key in prompts:
+				if prompts[key] == num:
+					prompts[key] = p
+
+		for item in prompts:
+			display.blit(item,prompts[item])
 
 		pygame.display.update()
 
-numP = None
-
-animals = ["cow", "rabbit", "animal", "bunny", "duck", "eagle", "bee", "armadillo", "arch", "asdf"]
-guesses = []
-game = True
-take = False
-TURN = "Player %s's turn!"
-guess = ""
-GREEN = (16,119,30)
-BLACK = (0,0,0)
-
-while not str(numP).isdigit():
-	try:
-		numP = int(raw_input("How many players: "))
-		if numP <= 1:
-			print "Too low!"
-			numP = None
-	except ValueError:
-		print "Not a number!"
-
-players = init(numP)
-
-pygame.init()
-
-display = pygame.display.set_mode((720, 480)) #set screen size
-display.fill((GREEN))
-pygame.display.set_caption("Animal Game!") #set window caption
-fontObj = pygame.font.Font('freesansbold.ttf', 29) #Sent game fonts
-
-while True:
+def Game(game,players):
+	guesses = []
+	take = False
+	TURN = "Player %s's turn!"
+	guess = ""
 	while game:
 		for item in letters[:26]:
 			take = False
@@ -119,14 +89,20 @@ while True:
 					fontObj.render(">>> ", True, BLACK)]
 					promptpos=[((display.get_width()/2)-(prompt[0].get_width()/2),0),(0, 125),(0, 151)]
 
-					guess = CLI(promptpos, prompt, pos=(prompt[2].get_width(),151))
+					guess = CLI(promptpos, prompt, (prompt[2].get_width(),151))
 
-					if guess.lower() in animals and guess.lower()[0] == item and guess.lower() not in guesses:
+					if guess.lower().startswith(item) and guess.lower() not in guesses and read(guess)[0]:
 						print "That's an animal!"
 						guesses.append(guess)
 
-					elif guess.lower() in guesses and guess.lower() in animals and guess.lower()[0] == item:
+					elif guess.lower() in guesses and guess.lower().startswith(item) and read(guess)[0]:
 						x=fontObj.render("That animal has already been said!",True,BLACK)
+						display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+						pygame.display.update()
+						pygame.time.delay(2000)
+
+					elif read(guess)[1] == "gen":
+						x=fontObj.render("To general, try being more specific.",True,BLACK)
 						display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
 						pygame.display.update()
 						pygame.time.delay(2000)
@@ -158,7 +134,5 @@ while True:
 			players = init(numP)
 		else:
 			game = False
-
-shutdown()
 
 nuclear = u'\u2622'
