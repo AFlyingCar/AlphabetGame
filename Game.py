@@ -89,23 +89,29 @@ def Game(game,players):
 					fontObj.render(">>> ", True, BLACK)]
 					promptpos=[((display.get_width()/2)-(prompt[0].get_width()/2),0),(0, 125),(0, 151)]
 
-					guess = CLI(promptpos, prompt, (prompt[2].get_width(),151))
+					guess = CLI(promptpos, prompt, (prompt[2].get_width(),151),game=True)
 
 					if guess.lower().startswith(item) and guess.lower() not in guesses and read(guess)[0]:
 						print "That's an animal!"
 						guesses.append(guess)
+						x=fontObj.render(guess + " is an animal!",True,BLACK)
+						display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+						pygame.display.update()
+						pygame.time.delay(2000)
 
-					elif guess.lower() in guesses and guess.lower().startswith(item) and read(guess)[0]:
+					if guess.lower() in guesses and guess.lower().startswith(item) and read(guess)[0]:
 						x=fontObj.render("That animal has already been said!",True,BLACK)
 						display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
 						pygame.display.update()
 						pygame.time.delay(2000)
 
-					elif read(guess)[1] == "gen":
-						x=fontObj.render("To general, try being more specific.",True,BLACK)
-						display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
-						pygame.display.update()
-						pygame.time.delay(2000)
+					if len(read(guess)) > 2:
+						if read(guess)[1] == "gen":
+							x=fontObj.render("To general, try being more specific.",True,BLACK)
+							display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+							pygame.display.update()
+							pygame.time.delay(2000)
+							continue
 
 					else:
 						print "Take!"
