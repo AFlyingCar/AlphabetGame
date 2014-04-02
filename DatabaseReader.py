@@ -18,16 +18,15 @@ def read(animal):
 	try:
 		print root[0][1].text
 	except IndexError:
-		print "Too general!"
-		return [False,'gen']
-
-	if animal == root[0][1].text:
-		print "exists!"
-		return [True]
-	else:
 		print "does not exist"
 		return [False]
 
-read("aPuS")
+	if animal == root[0][1].text or animal == root[0][1].text:
+		print "exists"
+		return [True]
+
+	else:
+		print "too general"
+		return [False,'gen']
 
 nuclear = u'\u2622'
