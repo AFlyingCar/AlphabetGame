@@ -38,6 +38,5 @@ AlphabetGame
   *Linux*
     *Pygame*
     - Open Terminal
-    - Type '''shell
-    $ sudo apt-get install python-pygame
-    '''
+    - Type:
+        $ sudo apt-get install python-pygame
