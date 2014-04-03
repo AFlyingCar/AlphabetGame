@@ -145,20 +145,27 @@ def Game(game,players):
 						display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
 						pygame.display.update()
 						pygame.time.delay(2000)
+						continue
 
-					if guess.lower() in guesses and guess.lower().startswith(item) and read(guess)[0]:
+					elif guess.lower() in guesses and guess.lower().startswith(item) and read(guess)[0]:
 						x=fontObj.render("That animal has already been said!",True,BLACK)
 						display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
 						pygame.display.update()
 						pygame.time.delay(2000)
 
-					if len(read(guess)) > 2:
+					elif len(read(guess)) > 2:
 						if read(guess)[1] == "gen":
 							x=fontObj.render("To general, try being more specific.",True,BLACK)
 							display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
 							pygame.display.update()
 							pygame.time.delay(2000)
 							continue
+
+					elif not guess.lower().startswith(item):
+						x=fontObj.render("That does not start with " + item + "!",True,BLACK)
+						display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+						pygame.display.update()
+						pygame.time.delay(2000)
 
 					else:
 						print "Take!"
@@ -223,9 +230,10 @@ def Start(menu,vars=[]):
 	display.fill(WHITE)
 	startb = button((500, 180), True, "startb")
 	optionb = button((500, 250), False, "optionb")
-	exitb = button((500, 320), False, "exitb")
+	creditb = button((500,320), False, "creditb")
+	exitb = button((500, 390), False, "exitb")
 
-	buttons = {1:startb, 2:exitb, 3:optionb}
+	buttons = {1:startb, 4:exitb, 2:optionb, 3:creditb}
 	selected = 1
 	buttons[selected].setSelect(True)
 
@@ -233,10 +241,12 @@ def Start(menu,vars=[]):
 		startdisp = fontObj.render("Start", True, startb.getSelect())
 		exitdisp = fontObj.render("Exit", True, exitb.getSelect())
 		optiondisp = fontObj.render("Options", True, optionb.getSelect())
+		creditdisp = fontObj.render("Credits", True, creditb.getSelect())
 
 		display.blit(startdisp, startb.getLoc())
 		display.blit(exitdisp, exitb.getLoc())
 		display.blit(optiondisp, optionb.getLoc())
+		display.blit(creditdisp, creditb.getLoc())
 
 		for event in pygame.event.get():
 			if event.type == QUIT:
@@ -259,24 +269,31 @@ def Start(menu,vars=[]):
 								p = get_players(CLI)
 								Game(True,p)
 
+							elif buttons[item].getName() == "creditb":
+								Credits(True)
+
 				elif event.key == K_DOWN: #move down through menu
 					buttons[selected].setChoice(False)
 					if selected == 1:
-						selected += 2
+						selected = 2
 					elif selected == 2:
-						selected -= 1
-					else:
-						selected -= 1
+						selected = 3
+					elif selected == 3:
+						selected = 4
+					elif selected == 4:
+						selected = 1
 					buttons[selected].setChoice(True)
 				
 				elif event.key == K_UP: #move up through menu
 					buttons[selected].setChoice(False)
 					if selected == 1:
-						selected += 1
+						selected = 4
 					elif selected == 2:
-						selected += 1
-					else:
-						selected -= 2
+						selected = 1
+					elif selected == 3:
+						selected = 2
+					elif selected == 4:
+						selected = 3
 					buttons[selected].setChoice(True)
 		
 		for item in buttons:
@@ -295,7 +312,7 @@ def Pause(menu,vars=[]):
 	optionb = button((500, 250), False, "optionb")
 	exitb = button((500, 320), False, "exitb")
 
-	buttons = {1:resumeb, 2:exitb, 3:optionb}
+	buttons = {1:resumeb, 3:exitb, 2:optionb}
 	selected = 1
 	buttons[selected].setSelect(True)
 
@@ -333,21 +350,21 @@ def Pause(menu,vars=[]):
 				elif event.key == K_DOWN: #move down through menu
 					buttons[selected].setChoice(False)
 					if selected == 1:
-						selected += 2
+						selected = 2
 					elif selected == 2:
-						selected -= 1
-					else:
-						selected -= 1
+						selected = 3
+					elif selected == 3:
+						selected = 1
 					buttons[selected].setChoice(True)
 				
 				elif event.key == K_UP: #move up through menu
 					buttons[selected].setChoice(False)
 					if selected == 1:
-						selected += 1
+						selected = 3
 					elif selected == 2:
-						selected += 1
-					else:
-						selected -= 2
+						selected = 1
+					elif selected == 3:
+						selected = 2
 					buttons[selected].setChoice(True)
 		
 		for item in buttons:
@@ -365,7 +382,7 @@ def Option(menu,vars=[]):
 	backb = button((500, 180), True, "backb")
 	resob = button((500, 250), False, "resob")
 
-	buttons = {1:backb, 2:resob}
+	buttons = {2:backb, 1:resob}
 	selected = 1
 	buttons[selected].setSelect(True)
 
@@ -399,18 +416,17 @@ def Option(menu,vars=[]):
 				elif event.key == K_DOWN: #move down through menu
 					buttons[selected].setChoice(False)
 					if selected == 1:
-						selected += 1
-					else:
-						selected -= 1
+						selected = 2
+					elif selected == 2:
+						selected = 1
 					buttons[selected].setChoice(True)
 				
 				elif event.key == K_UP: #move up through menu
 					buttons[selected].setChoice(False)
 					if selected == 1:
-						selected += 1
-					else:
-						selected -= 1
-
+						selected = 2
+					elif selected == 2:
+						selected = 1
 					buttons[selected].setChoice(True)
 		
 		for item in buttons:
@@ -489,6 +505,37 @@ def Resolution(menu,vars=[]):
 			buttons[item].setSelect(buttons[item].getChoice())
 
 		pygame.display.update()
+
+	display.fill(WHITE)
+
+def Credits(menu):
+	display.fill(WHITE)
+	credit = open("CREDITS.TXT", "r").read().split("\n")
+	credits = []
+	posy = display.get_height()
+
+	for i in credit:
+		credits.append(fontObj.render(i,True,BLACK))
+
+	for i in range(len(credits)): prev = 5 * i
+
+	while menu:
+		display.fill(WHITE)
+		
+		for i in credits:
+			posx = display.get_width()/2 - i.get_width()/2
+			display.blit(i, (posx,posy + prev))
+			prev += i.get_height()
+			pygame.display.update()
+			pygame.time.delay(100)
+
+			if posy - prev <= 0:
+				credits.remove(i)
+
+			filter(None,credits)
+
+		if len(credits) == 0:
+			menu = False
 
 	display.fill(WHITE)
 
