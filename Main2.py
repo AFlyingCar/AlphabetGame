@@ -15,58 +15,43 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 GRAY = (171,162,162)
 
-def init(CLI):
-	players = []
-	numP = None
-	y=0
+def InternetCheck(CLI):
+	display.fill(WHITE)
 
 	try:
 		u.urlopen("http://www.google.com")
-
 	except Exception as e:
 		print e
 		print "An internet connection is required to play."
 		print "Exiting."
+
+		display.fill(WHITE)
+		
+		disp=[fontObj.render("An internet connection is required to play.",True,BLACK),
+		fontObj.render("Exiting.",True,BLACK)]
+
+		x = 0
+		
+		for i in disp:
+			x += (i.get_height() + 10)
+			display.blit(i,(display.get_width()/2-(i.get_width()/2),display.get_height()/2+x))
+			pygame.display.update()
+
+			for event in pygame.event.get():
+				keycheck(event,True)
+
+			pygame.time.delay(1000)
+
+		display.fill(WHITE)
+
+		prompt = [fontObj.render("Press any key to continue.",True,BLACK)]
+		x=(display.get_width()/2)-(prompt[0].get_width()/2)
+		y=(display.get_height()/2)-(prompt[0].get_height()/2)
+		promptpos=[(x,y)]
+
+		ask = CLI(promptpos, prompt, ((display.get_width()/2)-(prompt[0].get_width()/2),(display.get_height()/2)+prompt[0].get_height()),color=WHITE)
+
 		shutdown()
-
-	while not str(numP).isdigit():
-		prompt = [fontObj.render("How many players: ",True,BLACK)]
-		numP = CLI([(0, 151)],prompt,[prompt[0].get_width(),151],color=WHITE)
-
-		if str(numP).isdigit():
-			numP=int(numP)
-
-		else:
-			y+=1
-			print "Not a number!"
-			if y>=5:
-				shutdown()
-
-			display.fill(WHITE)
-			x=fontObj.render(numP + " is not a number!",True,BLACK)
-			display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
-			pygame.display.update()
-			pygame.time.delay(2000)
-			continue
-
-		if numP <= 1:
-			print "Too low!"
-			numP = None
-
-			display.fill(WHITE)
-			x=fontObj.render("Sorry, but a minimum of 2 players is required.",True,BLACK)
-			display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
-			pygame.display.update()
-			pygame.time.delay(2000)
-
-	for i in range(numP):
-		prompt = [fontObj.render("What is Player %d's name: "%i,True,BLACK)]
-		name = CLI([(0, 151)],prompt,[prompt[0].get_width(),151],color=WHITE)
-		x = Player(name)
-		x.attr = i
-		players.append(x)
-
-	return players
 
 class Player():
 	def __init__(self, name=0):
@@ -82,7 +67,7 @@ class Player():
 	def getName(self):
 		return self.name
 
-def CLI(promptpos, prompt, pos, uinput="",color=GREEN,game=False):
+def CLI(promptpos,prompt,pos,uinput="",color=GREEN,game=False):
 	while True:
 		for event in pygame.event.get():
 			keycheck(event,game)
@@ -271,7 +256,8 @@ def Start(menu,vars=[]):
 								Option(True)
 
 							elif buttons[item].getName() == "startb":
-								Game(True,vars)
+								p = get_players(CLI)
+								Game(True,p)
 
 				elif event.key == K_DOWN: #move down through menu
 					buttons[selected].setChoice(False)
@@ -404,8 +390,10 @@ def Option(menu,vars=[]):
 							
 							if buttons[item].getName() == "resob":
 								Resolution(True)
+								display.fill(WHITE)
 
 							elif buttons[item].getName() == "backb":
+								display.fill(WHITE)
 								return None
 
 				elif event.key == K_DOWN: #move down through menu
@@ -467,32 +455,33 @@ def Resolution(menu,vars=[]):
 							print buttons[item].getName() + " has been selected."
 							
 							if buttons[item].getName() == "fullb":
-								return pygame.display.set_mode(FULLSCREEN)
+								return pygame.display.set_mode((640,480), FULLSCREEN)
 
 							elif buttons[item].getName() == "backb":
-								return pygame.display.set_mode((640,480))
+								display.fill(WHITE)
+								return True
 
 							elif buttons[item].getName() == "defb":
-								return True
+								return pygame.display.set_mode((640,480))
 
 				elif event.key == K_DOWN: #move down through menu
 					buttons[selected].setChoice(False)
 					if selected == 1:
-						selected += 2
+						selected = 2
 					elif selected == 2:
-						selected -= 1
-					else:
-						selected -= 1
+						selected = 3
+					elif selected == 3:
+						selected = 1
 					buttons[selected].setChoice(True)
 				
 				elif event.key == K_UP: #move up through menu
 					buttons[selected].setChoice(False)
 					if selected == 1:
-						selected += 1
+						selected = 3
 					elif selected == 2:
-						selected += 1
-					else:
-						selected -= 2
+						selected = 1
+					elif selected == 3:
+						selected = 2
 					buttons[selected].setChoice(True)
 		
 		for item in buttons:
@@ -520,6 +509,50 @@ def keycheck(event,game):
             else:
             	shutdown()
 
+def get_players(CLI):
+	players = []
+	numP = None
+	y=0
+
+	while not str(numP).isdigit():
+		prompt = [fontObj.render("How many players: ",True,BLACK)]
+		numP = CLI([(0, 151)],prompt,[prompt[0].get_width(),151],color=WHITE,game=True)
+
+		if str(numP).isdigit():
+			numP=int(numP)
+
+		else:
+			y+=1
+			print "Not a number!"
+			if y>=5:
+				shutdown()
+
+			display.fill(WHITE)
+			x=fontObj.render(numP + " is not a number!",True,BLACK)
+			display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+			pygame.display.update()
+			pygame.time.delay(2000)
+			continue
+
+		if numP <= 1:
+			print "Too low!"
+			numP = None
+
+			display.fill(WHITE)
+			x=fontObj.render("Sorry, but a minimum of 2 players is required.",True,BLACK)
+			display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+			pygame.display.update()
+			pygame.time.delay(2000)
+
+	for i in range(numP):
+		prompt = [fontObj.render("What is Player %d's name: "%i,True,BLACK)]
+		name = CLI([(0, 151)],prompt,[prompt[0].get_width(),151],color=WHITE)
+		x = Player(name)
+		x.attr = i
+		players.append(x)
+
+	return players
+
 if __name__ == '__main__':
 	pygame.init()
 
@@ -528,7 +561,8 @@ if __name__ == '__main__':
 	pygame.display.set_caption("Animal Game!") #set window caption
 	fontObj = pygame.font.Font('freesansbold.ttf', 29) #Set game fonts
 
-	vars = init(CLI)
-	Start(True,vars=vars)
+	InternetCheck(CLI)
+
+	Start(True)
 
 nuclear = u'\u2622'
