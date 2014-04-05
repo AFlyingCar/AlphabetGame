@@ -519,30 +519,33 @@ def Resolution(menu,vars=[]):
 def Credits(menu):
 	display.fill(WHITE)
 	credit = open("CREDITS.TXT", "r").read().split("\n")
-	credits = []
+	creditList = []
+	credits = {}
 	posy = display.get_height()
+	num = 1
+	items = 0
 
 	for i in credit:
-		credits.append(fontObj.render(i,True,BLACK))
+		creditList.append(fontObj.render(i,True,BLACK))
 
-	for i in range(len(credits)): prev = 5 * i
+	for i in creditList:
+		credits[num] = [i,posy+(num*i.get_height())]
+		num += 1
+		items += 1
 
 	while menu:
 		display.fill(WHITE)
+
+		for i in credits:
+			credits[i][1]-=1
 		
 		for i in credits:
-			posx = display.get_width()/2 - i.get_width()/2
-			display.blit(i, (posx,posy + prev))
-			prev += i.get_height()
+			posx = display.get_width()/2 - credits[i][0].get_width()/2
+			posy -= 1
+			display.blit(credits[i][0], (posx,credits[i][1]))
 			pygame.display.update()
-			pygame.time.delay(100)
 
-			if posy - prev <= 0:
-				credits.remove(i)
-
-			filter(None,credits)
-
-		if len(credits) == 0:
+		if credits[items][1] <= 0-credits[items][0].get_height():
 			menu = False
 
 	display.fill(WHITE)
