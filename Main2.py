@@ -57,6 +57,7 @@ class Player():
 	def __init__(self, name=0):
 		self.letters = []
 		self.name = str(name)
+		self.turn = False
 
 	def addLetter(self, let):
 		self.letters.append(let)
@@ -66,6 +67,12 @@ class Player():
 
 	def getName(self):
 		return self.name
+
+	def setTurn(self,turn):
+		self.turn = turn
+
+	def getTurn(self):
+		return self.turn
 
 def CLI(promptpos,prompt,pos,uinput="",color=GREEN,game=False):
 	while True:
@@ -82,11 +89,12 @@ def CLI(promptpos,prompt,pos,uinput="",color=GREEN,game=False):
 					try:
 						uinput = uinput[:-1]
 						print ">> " + uinput
+						continue
 
 					except Exception:
 						continue
 
-				if event.key == K_ESCAPE:
+				if event.key == K_ESCAPE or event.key == K_TAB:
 					continue
 
 				else:
@@ -124,65 +132,81 @@ def Game(game,players):
 	while game:
 		for item in letters[:26]:
 			take = False
+			print "next letter"
 
 			while not take:
 				for i in players:
+					print "next turn"
+					if i.getTurn():
+						prompt = [fontObj.render(TURN % i.getName(), True, BLACK),
+						fontObj.render("Choose an animal that starts with the letter '" + item.upper() + "'.", True, BLACK),
+						fontObj.render(">>> ", True, BLACK)]
+						promptpos=[((display.get_width()/2)-(prompt[0].get_width()/2),0),(0, 125),(0, 151)]
+
+						guess = CLI(promptpos, prompt, (prompt[2].get_width(),151),game=True)
+
+						if guess.lower().startswith(item) and guess.lower() not in guesses and read(guess,shutdown)[0]:
+							print "That's an animal!"
+							guesses.append(guess)
+							x=fontObj.render(guess + " is an animal!",True,BLACK)
+							display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+							pygame.display.update()
+							pygame.time.delay(2000)
+
+							if players.index(i) == len(players)-1:
+								players[0].setTurn(True)
+							else:
+								players[players.index(i)+1].setTurn(True)
+
+							players[players.index(i)].setTurn(False)
+
+						elif guess.lower() in guesses and guess.lower().startswith(item) and read(guess,shutdown)[0]:
+							x=fontObj.render("That animal has already been said!",True,BLACK)
+							display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+							pygame.display.update()
+							pygame.time.delay(2000)
+
+						elif len(read(guess,shutdown)) >= 2:
+							if read(guess,shutdown)[1] == "gen":
+								x=fontObj.render("To general, try being more specific.",True,BLACK)
+								display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+								pygame.display.update()
+								pygame.time.delay(2000)
+
+						elif not guess.lower().startswith(item):
+							x=fontObj.render("That does not start with " + item + "!",True,BLACK)
+							display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+							pygame.display.update()
+							pygame.time.delay(2000)
+
+						else:
+							print "Take!"
+							x=fontObj.render("Take the letter %s!" % i.getName(),True, BLACK)
+							i.addLetter(item)
+							guesses = []
+							take = True
+							display.fill(GREEN)
+							display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+							pygame.display.update()
+							pygame.time.delay(2000)
+
+							if players.index(i) == len(players)-1:
+								players[0].setTurn(True)
+							else:
+								players[players.index(i)+1].setTurn(True)
+
+							players[players.index(i)].setTurn(False)
+							break
+
+						pygame.display.update()
+
 					if len(i.getLetter()) >= 3:
 						players.remove(i)
 						players = filter(None, players)
 
-					prompt = [fontObj.render(TURN % i.getName(), True, BLACK),
-					fontObj.render("Choose an animal that starts with the letter '" + item.upper() + "'.", True, BLACK),
-					fontObj.render(">>> ", True, BLACK)]
-					promptpos=[((display.get_width()/2)-(prompt[0].get_width()/2),0),(0, 125),(0, 151)]
+					if len(players) == 1: break
 
-					guess = CLI(promptpos, prompt, (prompt[2].get_width(),151),game=True)
-
-					if guess.lower().startswith(item) and guess.lower() not in guesses and read(guess)[0]:
-						print "That's an animal!"
-						guesses.append(guess)
-						x=fontObj.render(guess + " is an animal!",True,BLACK)
-						display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
-						pygame.display.update()
-						pygame.time.delay(2000)
-						continue
-
-					elif guess.lower() in guesses and guess.lower().startswith(item) and read(guess)[0]:
-						x=fontObj.render("That animal has already been said!",True,BLACK)
-						display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
-						pygame.display.update()
-						pygame.time.delay(2000)
-
-					elif len(read(guess)) > 2:
-						if read(guess)[1] == "gen":
-							x=fontObj.render("To general, try being more specific.",True,BLACK)
-							display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
-							pygame.display.update()
-							pygame.time.delay(2000)
-							continue
-
-					elif not guess.lower().startswith(item):
-						x=fontObj.render("That does not start with " + item + "!",True,BLACK)
-						display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
-						pygame.display.update()
-						pygame.time.delay(2000)
-
-					else:
-						print "Take!"
-						x=fontObj.render("Take the letter %s!" % i.getName(),True, BLACK)
-						i.addLetter(item)
-						guesses = []
-						take = True
-						display.fill(GREEN)
-						display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
-						pygame.display.update()
-						pygame.time.delay(2000)
-						break
-
-					pygame.display.update()
-
-			if len(players) == 1:
-				break
+			if len(players) == 1: break
 
 		prompt = [fontObj.render("Player %s is the winner!" % players[0].getName(), True, BLACK),
 		fontObj.render("Would you like to play again: ", True, BLACK)]
@@ -253,12 +277,10 @@ def Start(menu,vars=[]):
 				shutdown()
 
 			elif event.type == KEYDOWN:
-				print selected
-
 				if event.key == K_z: #enter option
 					for item in buttons:
 						if buttons[item].getChoice():
-							print buttons[item].getName() + " has been selected."
+							#print buttons[item].getName() + " has been selected."
 							if buttons[item].getName() == "exitb":
 								shutdown()
 
@@ -297,7 +319,6 @@ def Start(menu,vars=[]):
 					buttons[selected].setChoice(True)
 		
 		for item in buttons:
-			print buttons[item].getName(), buttons[item].getChoice()
 			buttons[item].setSelect(buttons[item].getChoice())
 
 		pygame.display.update()
@@ -332,12 +353,9 @@ def Pause(menu,vars=[]):
 				shutdown()
 
 			elif event.type == KEYDOWN:
-				print selected
-
 				if event.key == K_z: #enter option
 					for item in buttons:
 						if buttons[item].getChoice():
-							print buttons[item].getName() + " has been selected."
 							if buttons[item].getName() == "exitb":
 								Start(True)
 
@@ -368,7 +386,6 @@ def Pause(menu,vars=[]):
 					buttons[selected].setChoice(True)
 		
 		for item in buttons:
-			print buttons[item].getName(), buttons[item].getChoice()
 			buttons[item].setSelect(buttons[item].getChoice())
 
 		pygame.display.update()
@@ -398,13 +415,9 @@ def Option(menu,vars=[]):
 				shutdown()
 
 			elif event.type == KEYDOWN:
-				print selected
-
 				if event.key == K_z: #enter option
 					for item in buttons:
-						if buttons[item].getChoice():
-							print buttons[item].getName() + " has been selected."
-							
+						if buttons[item].getChoice():							
 							if buttons[item].getName() == "resob":
 								Resolution(True)
 								display.fill(WHITE)
@@ -430,7 +443,6 @@ def Option(menu,vars=[]):
 					buttons[selected].setChoice(True)
 		
 		for item in buttons:
-			print buttons[item].getName(), buttons[item].getChoice()
 			buttons[item].setSelect(buttons[item].getChoice())
 
 		pygame.display.update()
@@ -463,13 +475,10 @@ def Resolution(menu,vars=[]):
 				shutdown()
 
 			elif event.type == KEYDOWN:
-				print selected
 
 				if event.key == K_z: #enter option
 					for item in buttons:
-						if buttons[item].getChoice():
-							print buttons[item].getName() + " has been selected."
-							
+						if buttons[item].getChoice():							
 							if buttons[item].getName() == "fullb":
 								return pygame.display.set_mode((640,480), FULLSCREEN)
 
@@ -501,7 +510,6 @@ def Resolution(menu,vars=[]):
 					buttons[selected].setChoice(True)
 		
 		for item in buttons:
-			print buttons[item].getName(), buttons[item].getChoice()
 			buttons[item].setSelect(buttons[item].getChoice())
 
 		pygame.display.update()
@@ -597,6 +605,8 @@ def get_players(CLI):
 		x = Player(name)
 		x.attr = i
 		players.append(x)
+
+	players[0].setTurn(True)
 
 	return players
 
