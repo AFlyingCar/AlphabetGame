@@ -5,8 +5,13 @@
 
 from xml.etree import ElementTree as ET
 import urllib2 as u
+import Main2
 
-def read(animal):
+def read(animal,shutdown):
+	if animal == "":
+		print "no animal"
+		return [False]
+
 	animal = animal.upper()[0] + animal.lower()[1:]
 	print animal
 
@@ -15,18 +20,23 @@ def read(animal):
 	tree = ET.parse(u.urlopen(URL))
 	root = tree.getroot()
 
-	try:
-		print root[0][1].text
-	except IndexError:
-		print "does not exist"
-		return [False]
+	for i in root.iter('results'):
+		if not i.attrib['error_message'] == "":
+			if i.attrib['error_message'] == "No names found":
+				print "does not exist"
+				return [False]
 
-	if animal == root[0][1].text or animal == root[0][1].text:
-		print "exists"
-		return [True]
+			else:
+				print "An error occured at catalogueoflife.org that we cannot control.\nThe website may be down.\nPlease try again later."
+				shutdown()
 
-	else:
-		print "too general"
-		return [False,'gen']
+		if int(i.attrib['total_number_of_results']) == 1 and i.attrib['name'] == animal:
+			print "exists"
+			return [True]
+
+		if int(i.attrib['total_number_of_results']) >= 2:
+			print i.attrib['total_number_of_results']
+			print "too general"
+			return [False,'gen']
 
 nuclear = u'\u2622'
