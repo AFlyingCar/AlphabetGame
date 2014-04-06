@@ -122,6 +122,10 @@ def CLI(promptpos,prompt,pos,uinput="",color=GREEN,game=False):
 		for item in prompts:
 			display.blit(item,prompts[item])
 
+		fps.tick(50)
+		fpsdisp = fontObj.render(str(fps.get_fps())[:5] + " fps",True,BLACK)
+		display.blit(fpsdisp,(display.get_width()-fpsdisp.get_width(),display.get_height()-fpsdisp.get_height()))
+
 		pygame.display.update()
 
 def Game(game,players):
@@ -137,6 +141,11 @@ def Game(game,players):
 			while not take:
 				for i in players:
 					print "next turn"
+				
+					fps.tick(50)
+					fpsdisp = fontObj.render(str(fps.get_fps())[:5] + " fps",True,BLACK)
+					display.blit(fpsdisp,(display.get_width()-fpsdisp.get_width(),display.get_height()-fpsdisp.get_height()))
+
 					if i.getTurn():
 						prompt = [fontObj.render(TURN % i.getName(), True, BLACK),
 						fontObj.render("Choose an animal that starts with the letter '" + item.upper() + "'.", True, BLACK),
@@ -250,7 +259,7 @@ class button():
 	def setLoc(self, loc):
 		self.loc = loc
 
-def Start(menu,vars=[]):
+def Start(menu,*args):
 	display.fill(WHITE)
 	startb = button((500, 180), True, "startb")
 	optionb = button((500, 250), False, "optionb")
@@ -262,6 +271,7 @@ def Start(menu,vars=[]):
 	buttons[selected].setSelect(True)
 
 	while menu:
+		display.fill(WHITE)
 		startdisp = fontObj.render("Start", True, startb.getSelect())
 		exitdisp = fontObj.render("Exit", True, exitb.getSelect())
 		optiondisp = fontObj.render("Options", True, optionb.getSelect())
@@ -272,6 +282,10 @@ def Start(menu,vars=[]):
 		display.blit(optiondisp, optionb.getLoc())
 		display.blit(creditdisp, creditb.getLoc())
 
+		fps.tick(50)
+		fpsdisp = fontObj.render(str(fps.get_fps())[:5] + " fps",True,BLACK)
+		display.blit(fpsdisp,(display.get_width()-fpsdisp.get_width(),display.get_height()-fpsdisp.get_height()))
+
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				shutdown()
@@ -280,7 +294,6 @@ def Start(menu,vars=[]):
 				if event.key == K_z: #enter option
 					for item in buttons:
 						if buttons[item].getChoice():
-							#print buttons[item].getName() + " has been selected."
 							if buttons[item].getName() == "exitb":
 								shutdown()
 
@@ -325,7 +338,7 @@ def Start(menu,vars=[]):
 
 	display.fill(WHITE)
 
-def Pause(menu,vars=[]):
+def Pause(menu,*args):
 	display.fill(WHITE)
 	pygame.display.update()
 
@@ -347,6 +360,10 @@ def Pause(menu,vars=[]):
 		display.blit(resumedisp, resumeb.getLoc())
 		display.blit(exitdisp, exitb.getLoc())
 		display.blit(optiondisp, optionb.getLoc())
+
+		fps.tick(50)
+		fpsdisp = fontObj.render(str(fps.get_fps())[:5] + " fps",True,BLACK)
+		display.blit(fpsdisp,(display.get_width()-fpsdisp.get_width(),display.get_height()-fpsdisp.get_height()))
 
 		for event in pygame.event.get():
 			if event.type == QUIT:
@@ -392,7 +409,7 @@ def Pause(menu,vars=[]):
 
 	display.fill(WHITE)
 
-def Option(menu,vars=[]):
+def Option(menu,*args):
 	display.fill(WHITE)
 	pygame.display.update()
 
@@ -409,6 +426,10 @@ def Option(menu,vars=[]):
 
 		display.blit(backdisp, backb.getLoc())
 		display.blit(resodisp, resob.getLoc())
+
+		fps.tick(50)
+		fpsdisp = fontObj.render(str(fps.get_fps())[:5] + " fps",True,BLACK)
+		display.blit(fpsdisp,(display.get_width()-fpsdisp.get_width(),display.get_height()-fpsdisp.get_height()))
 
 		for event in pygame.event.get():
 			if event.type == QUIT:
@@ -449,7 +470,7 @@ def Option(menu,vars=[]):
 	
 	display.fill(WHITE)
 
-def Resolution(menu,vars=[]):
+def Resolution(menu,*args):
 	display.fill(WHITE)
 	pygame.display.update()
 
@@ -469,6 +490,10 @@ def Resolution(menu,vars=[]):
 		display.blit(backdisp, backb.getLoc())
 		display.blit(fulldisp, fullb.getLoc())
 		display.blit(defdisp, defb.getLoc())
+
+		fps.tick(50)
+		fpsdisp = fontObj.render(str(fps.get_fps())[:5] + " fps",True,BLACK)
+		display.blit(fpsdisp,(display.get_width()-fpsdisp.get_width(),display.get_height()-fpsdisp.get_height()))
 
 		for event in pygame.event.get():
 			if event.type == QUIT:
@@ -536,6 +561,13 @@ def Credits(menu):
 	while menu:
 		display.fill(WHITE)
 
+		for event in pygame.event.get():
+			if event.type == QUIT:
+				shutdown()
+			if event.type == KEYDOWN:
+				if event.key == K_ESCAPE:
+					return None
+
 		for i in credits:
 			credits[i][1]-=1
 		
@@ -543,10 +575,13 @@ def Credits(menu):
 			posx = display.get_width()/2 - credits[i][0].get_width()/2
 			posy -= 1
 			display.blit(credits[i][0], (posx,credits[i][1]))
-			pygame.display.update()
 
 		if credits[items][1] <= 0-credits[items][0].get_height():
 			menu = False
+
+		fps.tick(50)
+
+		pygame.display.update()
 
 	display.fill(WHITE)
 
@@ -554,18 +589,18 @@ def shutdown():
 	pygame.quit()
 	sys.exit()
 
-def keycheck(event,game):
-    if event.type == QUIT:
-        shutdown()
+def keycheck(event,game,*args):
+	if event.type == QUIT:
+		shutdown()
 
-    if event.type == KEYDOWN:
-        print event.unicode
+	if event.type == KEYDOWN:
+		print event.unicode
 
-        if event.key == K_ESCAPE:
-            if game:
-            	Pause(True)
-            else:
-            	shutdown()
+		if event.key == K_ESCAPE:
+			if game:
+				Pause(True)
+			else:
+				shutdown()
 
 def get_players(CLI):
 	players = []
@@ -620,6 +655,7 @@ if __name__ == '__main__':
 	display.fill((WHITE))
 	pygame.display.set_caption("Animal Game!") #set window caption
 	fontObj = pygame.font.Font('freesansbold.ttf', 29) #Set game fonts
+	fps = pygame.time.Clock()
 
 	InternetCheck(CLI)
 

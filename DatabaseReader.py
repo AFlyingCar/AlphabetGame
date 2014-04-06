@@ -5,7 +5,6 @@
 
 from xml.etree import ElementTree as ET
 import urllib2 as u
-import Main2
 
 def read(animal,shutdown):
 	if animal == "":
