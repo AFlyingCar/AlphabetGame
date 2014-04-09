@@ -9,6 +9,7 @@ import urllib2 as u
 from color import *
 import pygame,sys,os
 from pygame.locals import *
+import platform as plat
 
 def InternetCheck(CLI):
 	display.fill(WHITE)
@@ -261,12 +262,15 @@ def Start(menu,*args):
 	creditb = button((500,320), False, "creditb")
 	exitb = button((500, 390), False, "exitb")
 
+	BKG = pygame.image.load(os.path.join(os.getcwd().split(SLASH)[0],"Images","StartBKGRD.png"))
+
 	buttons = {1:startb, 4:exitb, 2:optionb, 3:creditb}
 	selected = 1
 	buttons[selected].setSelect(True)
 
 	while menu:
-		display.fill(WHITE)
+		display.blit(BKG,(0,0))
+
 		startdisp = fontObj.render("Start", True, startb.getSelect())
 		exitdisp = fontObj.render("Exit", True, exitb.getSelect())
 		optiondisp = fontObj.render("Options", True, optionb.getSelect())
@@ -500,14 +504,15 @@ def Resolution(menu,*args):
 					for item in buttons:
 						if buttons[item].getChoice():							
 							if buttons[item].getName() == "fullb":
-								return pygame.display.set_mode((640,480), FULLSCREEN)
+								info = pygame.display.Info()
+								return pygame.display.set_mode((info.current_w,info.current_h), FULLSCREEN)
 
 							elif buttons[item].getName() == "backb":
 								display.fill(WHITE)
 								return True
 
 							elif buttons[item].getName() == "defb":
-								return pygame.display.set_mode((640,480))
+								return pygame.display.set_mode((720,480))
 
 				elif event.key == K_DOWN: #move down through menu
 					buttons[selected].setChoice(False)
@@ -652,5 +657,8 @@ pygame.display.set_caption("Animal Game!") #set window caption
 fontObj = pygame.font.Font('freesansbold.ttf', 29) #Set game fonts
 fps = pygame.time.Clock()
 pygame.mouse.set_visible(0)
+
+if plat.system == "Windows": SLASH = "\\"
+else: SLASH = "//"
 
 nuclear = u'\u2622'
