@@ -11,6 +11,14 @@ import pygame,sys,os
 from pygame.locals import *
 import platform as plat
 
+def capture():
+	s_num = 0
+	for screen in os.listdir(screen_path):
+		s_num = int(screen.split("-")[1].split(".")[0])
+
+	name = 'screenshot-' + str((s_num + 1)) + ".png"
+	pygame.image.save(display,os.path.join(screen_path,name))
+
 def InternetCheck(CLI):
 	display.fill(WHITE)
 
@@ -35,7 +43,10 @@ def InternetCheck(CLI):
 
 			for event in pygame.event.get():
 				keycheck(event,True)
-
+				if event.type == KEYDOWN:
+					if event.key == K_F4: #Take a screenshot
+						capture()
+						
 			pygame.time.delay(1000)
 
 		display.fill(WHITE)
@@ -93,6 +104,8 @@ def CLI(promptpos,prompt,pos,uinput="",color=GREEN,game=False):
 				if event.key == K_ESCAPE or event.key == K_TAB:
 					continue
 
+				elif event.key == K_F4: #Take a screenshot
+					capture()
 				else:
 					uinput += event.unicode
 					print ">> "+ uinput
@@ -329,7 +342,9 @@ def Start(menu,*args):
 					elif selected == 4:
 						selected = 3
 					buttons[selected].setChoice(True)
-		
+
+				elif event.key == K_F4: #Take a screenshot
+					capture()
 		for item in buttons:
 			buttons[item].setSelect(buttons[item].getChoice())
 
@@ -356,6 +371,7 @@ def Pause(menu,*args):
 
 		exitb.setLoc((display.get_width()-exitdisp.get_width() + 5, 320))
 
+		display.fill(WHITE)
 		display.blit(resumedisp, resumeb.getLoc())
 		display.blit(exitdisp, exitb.getLoc())
 		display.blit(optiondisp, optionb.getLoc())
@@ -400,7 +416,9 @@ def Pause(menu,*args):
 					elif selected == 3:
 						selected = 2
 					buttons[selected].setChoice(True)
-		
+
+				elif event.key == K_F4: #Take a screenshot
+					capture()
 		for item in buttons:
 			buttons[item].setSelect(buttons[item].getChoice())
 
@@ -423,6 +441,7 @@ def Option(menu,*args):
 		backdisp = fontObj.render("Back", True, backb.getSelect())
 		resodisp = fontObj.render("Resolution", True, resob.getSelect())
 
+		display.fill(WHITE)
 		display.blit(backdisp, backb.getLoc())
 		display.blit(resodisp, resob.getLoc())
 
@@ -461,7 +480,9 @@ def Option(menu,*args):
 					elif selected == 2:
 						selected = 1
 					buttons[selected].setChoice(True)
-		
+
+				elif event.key == K_F4: #Take a screenshot
+					capture()
 		for item in buttons:
 			buttons[item].setSelect(buttons[item].getChoice())
 
@@ -486,6 +507,7 @@ def Resolution(menu,*args):
 		fulldisp = fontObj.render("FullScreen", True, fullb.getSelect())
 		defdisp = fontObj.render("Default", True, defb.getSelect())
 
+		display.fill(WHITE)
 		display.blit(backdisp, backb.getLoc())
 		display.blit(fulldisp, fullb.getLoc())
 		display.blit(defdisp, defb.getLoc())
@@ -533,7 +555,9 @@ def Resolution(menu,*args):
 					elif selected == 3:
 						selected = 2
 					buttons[selected].setChoice(True)
-		
+
+				elif event.key == K_F4: #Take a screenshot
+					capture()
 		for item in buttons:
 			buttons[item].setSelect(buttons[item].getChoice())
 
@@ -568,6 +592,8 @@ def Credits(menu):
 				if event.key == K_ESCAPE:
 					return None
 
+				elif event.key == K_F4: #Take a screenshot
+					capture()
 		for i in credits:
 			credits[i][1]-=1
 		
@@ -660,5 +686,9 @@ pygame.mouse.set_visible(0)
 
 if plat.system == "Windows": SLASH = "\\"
 else: SLASH = "//"
+
+c_path = os.getcwd()
+screen_path = os.path.abspath(os.path.join(c_path,'Screenshots'))
+print screen_path
 
 nuclear = u'\u2622'
