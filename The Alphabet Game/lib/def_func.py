@@ -144,6 +144,7 @@ def Game(game,players):
 	take = False
 	TURN = "Player %s's turn!"
 	guess = ""
+	g_over = False
 	while game:
 		for item in letters[:26]:
 			take = False
@@ -152,26 +153,24 @@ def Game(game,players):
 			while not take:
 				for i in players:
 					print "next turn"
+					print len(players)
 				
 					fps.tick(50)
 					fpsdisp = fontObj.render(str(fps.get_fps())[:5] + " fps",True,BLACK)
 					display.blit(fpsdisp,(display.get_width()-fpsdisp.get_width(),display.get_height()-fpsdisp.get_height()))
 
-					if i.getTurn():
+					if i.getTurn() and len(i.getLetter()) <= 2:
 						prompt = [fontObj.render(TURN % i.getName(), True, BLACK),
 						fontObj.render("Choose an animal that starts with the letter '" + item.upper() + "'.", True, BLACK),
 						fontObj.render(">>> ", True, BLACK)]
 						promptpos=[((display.get_width()/2)-(prompt[0].get_width()/2),0),(0, 125),(0, 151)]
 
 						guess = CLI(promptpos, prompt, (prompt[2].get_width(),151),game=True)
-
 						xml_get = read(guess,shutdown)
 
 						if guess.lower().startswith(item) and unicode(guess.lower()) not in guesses and xml_get[0]:
 							print "That's an animal!"
 							guesses.append(guess.lower())
-							print guesses
-							print type(guesses[0]), repr(guesses[0])
 							x=fontObj.render(guess + " is an animal!",True,BLACK)
 							display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
 							pygame.display.update()
@@ -234,20 +233,32 @@ def Game(game,players):
 						players.remove(i)
 						players = filter(None, players)
 
-					if len(players) == 1: break
+					if len(players) <= 1:
+						take = True
+						g_over = True
+						break
 
 			if len(players) == 1: break
+
+		if not g_over:
+			continue
 
 		prompt = [fontObj.render("Player %s is the winner!" % players[0].getName(), True, BLACK),
 		fontObj.render("Would you like to play again: ", True, BLACK)]
 		promptpos=[(display.get_width()/2-(prompt[0].get_width()/2), 180),(0, display.get_height()/2)]
 
-		ask = CLI(promptpos, prompt, pos=(prompt[1].get_width(),180))
+		ask = CLI(promptpos, prompt, (prompt[1].get_width(),display.get_height()/2))
 
 		if ask.lower() == "y":
-			players = init(numP)
+			players = get_players(CLI)
+			guesses = []
+			take = False
+			guess = ""
+
 		else:
 			game = False
+			display.fill(WHITE)
+			return
 
 class button():
 	def __init__(self, loc, select, name): #all buttons start not selected
@@ -677,7 +688,7 @@ def get_players(CLI):
 			pygame.time.delay(2000)
 
 	for i in range(numP):
-		prompt = [fontObj.render("What is Player %d's name: "%i,True,BLACK)]
+		prompt = [fontObj.render("What is Player %d's name: "%(i+1),True,BLACK)]
 		name = CLI([(0, 151)],prompt,[prompt[0].get_width(),151],color=WHITE)
 		x = Player(name)
 		x.attr = i
