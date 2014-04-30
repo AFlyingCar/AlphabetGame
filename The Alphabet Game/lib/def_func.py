@@ -11,7 +11,7 @@ import pygame,sys,os
 from pygame.locals import *
 import platform as plat
 
-def capture():
+def capture(): #Screen capture (still image)
 	s_num = 0
 	for screen in os.listdir(screen_path):
 		s_num = int(screen.split("-")[1].split(".")[0])
@@ -104,8 +104,10 @@ def CLI(promptpos,prompt,pos,uinput="",color=GREEN,game=False):
 				if event.key == K_ESCAPE or event.key == K_TAB:
 					continue
 
-				elif event.key == K_F4: #Take a screenshot
+				#Take a screenshot#
+				elif event.key == K_F4:
 					capture()
+
 				else:
 					uinput += event.unicode
 					print ">> "+ uinput
@@ -163,7 +165,9 @@ def Game(game,players):
 
 						guess = CLI(promptpos, prompt, (prompt[2].get_width(),151),game=True)
 
-						if guess.lower().startswith(item) and guess.lower() not in guesses and read(guess,shutdown)[0]:
+						xml_get = read(guess,shutdown)
+
+						if guess.lower().startswith(item) and guess.lower() not in guesses and xml_get[0]:
 							print "That's an animal!"
 							guesses.append(guess)
 							x=fontObj.render(guess + " is an animal!",True,BLACK)
@@ -178,15 +182,21 @@ def Game(game,players):
 
 							players[players.index(i)].setTurn(False)
 
-						elif guess.lower() in guesses and guess.lower().startswith(item) and read(guess,shutdown)[0]:
+						elif guess.lower() in guesses and guess.lower().startswith(item) and xml_get[0]:
 							x=fontObj.render("That animal has already been said!",True,BLACK)
 							display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
 							pygame.display.update()
 							pygame.time.delay(2000)
 
-						elif len(read(guess,shutdown)) >= 2:
-							if read(guess,shutdown)[1] == "gen":
+						elif len(xml_get) >= 2:
+							if xml_get[1] == "gen":
 								x=fontObj.render("To general, try being more specific.",True,BLACK)
+								display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+								pygame.display.update()
+								pygame.time.delay(2000)
+
+							elif xml_get[1] == 'err':
+								x=fontObj.render("An error occurred. " + xml_get[2],True,BLACK)
 								display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
 								pygame.display.update()
 								pygame.time.delay(2000)
