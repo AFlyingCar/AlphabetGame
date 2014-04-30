@@ -167,9 +167,11 @@ def Game(game,players):
 
 						xml_get = read(guess,shutdown)
 
-						if guess.lower().startswith(item) and guess.lower() not in guesses and xml_get[0]:
+						if guess.lower().startswith(item) and unicode(guess.lower()) not in guesses and xml_get[0]:
 							print "That's an animal!"
-							guesses.append(guess)
+							guesses.append(guess.lower())
+							print guesses
+							print type(guesses[0]), repr(guesses[0])
 							x=fontObj.render(guess + " is an animal!",True,BLACK)
 							display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
 							pygame.display.update()
