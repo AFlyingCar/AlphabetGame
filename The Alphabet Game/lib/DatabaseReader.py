@@ -8,8 +8,8 @@ import urllib2 as u
 
 def read(animal,shutdown):
 	if animal == "":
-		print "no animal"
-		return [False]
+		print "skip"
+		return [False,'estr']
 
 	#animal = animal.upper()[0] + animal.lower()[1:]
 	animal = animal.lower()
@@ -22,6 +22,9 @@ def read(animal,shutdown):
 	animal += "%20"*(3-len(animal))
 
 	print animal
+
+	# if animal == "%20"*3:
+	# 	return[False,'estr']
 
 	URL = 'http://www.catalogueoflife.org/col/webservice?name=' + animal
 
@@ -42,9 +45,22 @@ def read(animal,shutdown):
 				print "An error occurred at catalogueoflife.org that we cannot control.\nThe website may be down.\nPlease try again later."
 				return [False, 'err', i.attrib['error_message']]
 
-		if int(i.attrib['total_number_of_results']) == 1 and i.attrib['name'] == animal:
+		#if int(i.attrib['total_number_of_results']) == 1 and i.attrib['name'] == animal:
+		if i.attrib['name'] == animal:
 			print "exists"
-			return [True]
+
+			for i in root[0]:
+				if i.tag == 'language':
+					if i.text != 'English' or i.text != "":
+						print i.text
+						return[False, 'lan']
+
+
+				elif i.tag == 'rank':
+					if i.text == 'Genus':
+						return[False, 'gen']
+
+			return[True]
 
 		if int(i.attrib['total_number_of_results']) >= 2:
 			print i.attrib['total_number_of_results']
