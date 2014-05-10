@@ -11,7 +11,8 @@ import pygame,sys,os
 from pygame.locals import *
 import platform as plat
 
-def capture(): #Screen capture (still image)
+#Screen capture#
+def capture():
 	s_num = 0
 	for screen in os.listdir(screen_path):
 		s_num = int(screen.split("-")[1].split(".")[0])
@@ -81,7 +82,46 @@ class Player():
 	def getTurn(self):
 		return self.turn
 
+class button():
+	def __init__(self, loc, select, name): #all buttons start not selected
+		self.bcolor = GRAY
+		self.select = select
+		self.name = name
+		self.loc = loc
+
+	def getSelect(self):
+		return self.bcolor
+		
+	def setSelect(self, select):
+		if select:
+			self.bcolor = BLACK
+		else:
+			self.bcolor = GRAY
+
+	def setChoice(self, pressed):
+			self.select = pressed
+
+	def getChoice(self):
+		return self.select
+
+	def getName(self):
+		return self.name
+
+	def getLoc(self):
+		return self.loc
+
+	def setLoc(self, loc):
+		self.loc = loc
+
 def CLI(promptpos,prompt,pos,uinput="",color=GREEN,game=False):
+	'''promptpos = [] 	->	Position for where prompts are displayed. Must be in the same order as prompt.
+	   prompt = [] 		->	Can have multiple prompts. Must be in the same order as promptpos.
+	   pos = () 		->	Position for where typed text is displayed.
+	   uinput = "" 		->	Starting string for inputed text. Empty by default.
+	   color = GREEN	->	Color to fill the display with.
+	   game = False		->	Pass to keycheck. True only if used in the game loop.
+	'''
+	key_held = False
 	while True:
 		for event in pygame.event.get():
 			keycheck(event,game)
@@ -94,12 +134,21 @@ def CLI(promptpos,prompt,pos,uinput="",color=GREEN,game=False):
 
 				if event.key == K_BACKSPACE:
 					try:
-						uinput = uinput[:-1]
 						print ">> " + uinput
+						uinput = uinput[:-1]
 						continue
 
 					except Exception:
 						continue
+
+				if event.key == K_LSHIFT or event.key == K_RSHIFT:
+					key_held = True
+
+				if event.key == K_DELETE:
+					if key_held:
+						uinput = ""
+
+					key_held = False
 
 				if event.key == K_ESCAPE or event.key == K_TAB:
 					continue
@@ -139,6 +188,15 @@ def CLI(promptpos,prompt,pos,uinput="",color=GREEN,game=False):
 
 		pygame.display.update()
 
+def infoPrint(string):
+	if type(string) != str:
+		string = ""
+
+	x=fontObj.render(string, True,BLACK)
+	display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+	pygame.display.update()
+	pygame.time.delay(2000)
+
 def Game(game,players):
 	guesses = []
 	take = False
@@ -160,9 +218,12 @@ def Game(game,players):
 					display.blit(fpsdisp,(display.get_width()-fpsdisp.get_width(),display.get_height()-fpsdisp.get_height()))
 
 					if i.getTurn() and len(i.getLetter()) <= 2:
-						prompt = [fontObj.render(TURN % i.getName(), True, BLACK),
+						prompt = [
+						fontObj.render(TURN % i.getName(), True, BLACK),
 						fontObj.render("Choose an animal that starts with the letter '" + item.upper() + "'.", True, BLACK),
-						fontObj.render(">>> ", True, BLACK)]
+						fontObj.render(">>> ", True, BLACK)
+						]
+
 						promptpos=[((display.get_width()/2)-(prompt[0].get_width()/2),0),(0, 125),(0, 151)]
 
 						guess = CLI(promptpos, prompt, (prompt[2].get_width(),151),game=True)
@@ -184,29 +245,55 @@ def Game(game,players):
 							players[players.index(i)].setTurn(False)
 
 						elif guess.lower() in guesses and guess.lower().startswith(item) and xml_get[0]:
-							x=fontObj.render("That animal has already been said!",True,BLACK)
-							display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
-							pygame.display.update()
-							pygame.time.delay(2000)
+							infoPrint("That animal has already been said!")
 
 						elif len(xml_get) >= 2:
 							if xml_get[1] == "gen":
-								x=fontObj.render("To general, try being more specific.",True,BLACK)
-								display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
-								pygame.display.update()
-								pygame.time.delay(2000)
+								infoPrint("To general, try being more specific.")
 
 							elif xml_get[1] == 'err':
-								x=fontObj.render("An error occurred. " + xml_get[2],True,BLACK)
-								display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
-								pygame.display.update()
-								pygame.time.delay(2000)
+								infoPrint("An error occurred. " + xml_get[2])
+
+							elif xml_get[1] == 'lan':
+								infoPrint("Please say the name in English.")
+
+							elif xml_get[1] == 'estr':
+								#Ask if the user wants to skip their turn, but they will take a letter.
+								prompt = [fontObj.render("Would you like to skip your turn?",True,BLACK)]
+								promptpos = [(display.get_width()/2-(prompt[0].get_width()/2),display.get_height()/2)]
+
+								while 1:
+									skip = CLI(promptpos,prompt,(prompt[0].get_width(),151),game=True)
+
+									if skip.lower() == 'y':
+										if players.index(i) == len(players)-1:
+											players[0].setTurn(True)
+										else:
+											players[players.index(i)+1].setTurn(True)
+
+										players[players.index(i)].setTurn(False)
+										display.fill(GREEN)
+
+										print "Take!"
+										print "Skip!"
+										# x=fontObj.render("Take the letter %s!" % i.getName(),True, BLACK)
+										i.addLetter(item)
+										guesses = []
+										take = True
+										display.fill(GREEN)
+										# display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
+										# pygame.display.update()
+										# pygame.time.delay(2000)
+										infoPrint("Take the letter %s!" % i.getName())
+										break
+
+									else: break
+
+							else:
+								infoPrint("Error: Unimplemented Feature")
 
 						elif not guess.lower().startswith(item):
-							x=fontObj.render("That does not start with " + item + "!",True,BLACK)
-							display.blit(x,(display.get_width()/2-(x.get_width()/2),display.get_height()/2))
-							pygame.display.update()
-							pygame.time.delay(2000)
+							infoPrint("That does not start with " + item + "!")
 
 						else:
 							print "Take!"
@@ -259,37 +346,6 @@ def Game(game,players):
 			game = False
 			display.fill(WHITE)
 			return
-
-class button():
-	def __init__(self, loc, select, name): #all buttons start not selected
-		self.bcolor = GRAY
-		self.select = select
-		self.name = name
-		self.loc = loc
-
-	def getSelect(self):
-		return self.bcolor
-		
-	def setSelect(self, select):
-		if select:
-			self.bcolor = BLACK
-		else:
-			self.bcolor = GRAY
-
-	def setChoice(self, pressed):
-			self.select = pressed
-
-	def getChoice(self):
-		return self.select
-
-	def getName(self):
-		return self.name
-
-	def getLoc(self):
-		return self.loc
-
-	def setLoc(self, loc):
-		self.loc = loc
 
 def Start(menu,*args):
 	display.fill(WHITE)
