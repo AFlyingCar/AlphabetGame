@@ -6,12 +6,13 @@
 from xml.etree import ElementTree as ET
 import urllib2 as u
 
+GEN_CLASS = ['order','phylum','class','kingdom','subphylum','superclass','suborder','infraclass']
+
 def read(animal,shutdown):
 	if animal == "":
 		print "skip"
 		return [False,'estr']
 
-	#animal = animal.upper()[0] + animal.lower()[1:]
 	animal = animal.lower()
 	print animal
 
@@ -22,9 +23,6 @@ def read(animal,shutdown):
 	animal += "%20"*(3-len(animal))
 
 	print animal
-
-	# if animal == "%20"*3:
-	# 	return[False,'estr']
 
 	URL = 'http://www.catalogueoflife.org/col/webservice?name=' + animal
 
@@ -57,15 +55,10 @@ def read(animal,shutdown):
 
 
 				elif i.tag == 'rank':
-					if i.text == 'Genus':
+					if i.text.lower() in GEN_CLASS:
 						return[False, 'gen']
 
 			return[True]
-
-		if int(i.attrib['total_number_of_results']) >= 2:
-			print i.attrib['total_number_of_results']
-			print "too general"
-			return [False,'gen']
 
 		else:
 			print "A fatal error occurred."
